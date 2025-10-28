@@ -5,14 +5,13 @@ def isValidNumber(string):
 
 def getCheckSum(string):
     checkSum = 0
-    reverse_digits = string[::-1]
-    for i, digit in enumerate(reverse_digits):
-        n = int(digit)
-        if i % 2 == 1:
-            n *= 2
-            if n > 9:
-                n -= 9
-        checkSum += n
+    for i in reversed(range(0, len(string) - 1, 2)):
+        if int(string[i]) * 2 > 9:
+            checkSum = checkSum + 1 + int(string[i]) * 2 - 10
+        else:
+            checkSum = checkSum + int(string[i]) * 2
+    for i in reversed(range(1, len(string) + 1, 2)):
+        checkSum += int(string[i])
     return checkSum
 
 def getCardType(string):
