@@ -30,3 +30,38 @@ def load_sequences(filename):
         print(f"Файл {filename} не найден!")
         return {}
     return proteins
+
+
+def process_commands(commands_file, proteins, output_file, author_name):
+    with open(commands_file, 'r', encoding='utf-8') as f, open(output_file, 'w', encoding='utf-8') as out:
+        out.write(f"{author_name}\n")
+        out.write("Genetic Searching\n")
+        out.write("-" * 74 + "\n")
+
+        op_num = 1
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            parts = line.split('\t')
+            cmd = parts[0].lower()
+
+            out.write(f"{op_num:03d}   {cmd}")
+
+            if cmd == 'search':
+                if len(parts) < 2:
+                    out.write("   \n")
+                    out.write("organism\t\t\t\tprotein \n")
+                    out.write("NOT FOUND\n")
+                else:
+                    query = decode_rle(parts[1])
+                    out.write(f"   {query} \n")
+                    out.write("organism\t\t\t\tprotein \n")
+                    found = False
+                    for name, data in proteins.items():
+                        if query in data['sequence']:
+                            out.write(f"{data['organism']}\t\t{name}\n")
+                            found = True
+                    if not found:
+                        out.write("NOT FOUND\n")
