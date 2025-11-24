@@ -65,3 +65,23 @@ def process_commands(commands_file, proteins, output_file, author_name):
                             found = True
                     if not found:
                         out.write("NOT FOUND\n")
+
+            elif cmd == 'diff':
+                if len(parts) < 3:
+                    out.write("   \n")
+                    out.write("amino-acids difference: \n")
+                    out.write("MISSING: PARAMETERS\n")
+                else:
+                    p1, p2 = parts[1], parts[2]
+                    out.write(f"   {p1}   {p2} \n")
+                    out.write("amino-acids difference: \n")
+                    missing = [p for p in [p1, p2] if p not in proteins]
+                    if missing:
+                        out.write(f"MISSING: {', '.join(missing)}\n")
+                    else:
+                        s1, s2 = proteins[p1]['sequence'], proteins[p2]['sequence']
+                        min_len = min(len(s1), len(s2))
+                        diff = sum(1 for i in range(min_len) if s1[i] != s2[i])
+                        diff += abs(len(s1) - len(s2))
+                        out.write(f"{diff}\n")
+
