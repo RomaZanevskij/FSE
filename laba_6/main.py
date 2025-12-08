@@ -136,3 +136,110 @@ def analyze_user(user, workouts):
     print(f"Пройдено дистанции: {total_distance} км")
     print(f"Средние калории за тренировку: {avg_calories}")
     print(f"Любимый тип тренировки: {favorite_type}")
+
+def plot_workout_type_distribution(workouts):
+    type_counts = {}
+    for workout in workouts:
+        wtype = workout['type']
+        type_counts[wtype] = type_counts.get(wtype, 0) + 1
+
+    labels = list(type_counts.keys())
+    sizes = list(type_counts.values())
+
+    plt.figure(figsize=(8, 6))
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.title("Распределение типов тренировок")
+    plt.axis('equal')  
+    plt.show()
+
+def plot_user_activity_bar_chart(users, workouts):
+    user_counts = {}
+    for user in users:
+        count = sum(1 for w in workouts if w['user_id'] == user['user_id'])
+        user_counts[user['name']] = count
+
+    names = list(user_counts.keys())
+    counts = list(user_counts.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(names, counts)
+    plt.title("Активность пользователей (количество тренировок)", fontsize=14)
+    plt.xlabel("Пользователи", fontsize=12)
+    plt.ylabel("Количество тренировок", fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+def plot_efficiency_by_type(workouts):
+    type_stats = {}
+
+    for w in workouts:
+        wtype = w['type']
+        if wtype not in type_stats:
+            type_stats[wtype] = {'total_calories': 0, 'total_duration': 0}
+        type_stats[wtype]['total_calories'] += w['calories']
+        type_stats[wtype]['total_duration'] += w['duration']
+
+    types = []
+    efficiency = []
+
+    for wtype, stats in type_stats.items():
+        if stats['total_duration'] > 0:
+            cal_per_min = stats['total_calories'] / stats['total_duration']
+            types.append(wtype)
+            efficiency.append(round(cal_per_min, 2))
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(types, efficiency, color='purple')
+    plt.title("Эффективность тренировок (калории/минуту)", fontsize=14)
+    plt.xlabel("Тип тренировки", fontsize=12)
+    plt.ylabel("Калории/минуту", fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+def plot_calories_by_user(users, workouts):
+    user_stats = []
+    for user in users:
+        user_workouts = [w for w in workouts if w['user_id'] == user['user_id']]
+        total_calories = sum(w['calories'] for w in user_workouts)
+        user_stats.append({
+            'name': user['name'],
+            'calories': total_calories,
+            'level': user['fitness_level']
+        })
+
+    user_stats.sort(key=lambda x: x['calories'], reverse=True)
+
+    level_colors = {
+        'продвинутый': 'red',
+        'средний': 'orange',
+        'начинающий': 'green'
+    }
+
+    names = [u['name'] for u in user_stats]
+    calories = [u['calories'] for u in user_stats]
+    colors = [level_colors.get(u['level'], 'green') for u in user_stats]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(names, calories, color=colors)
+    plt.title("Сравнение пользователей по общим затраченным калориям", fontsize=14)
+    plt.xlabel("Пользователи", fontsize=12)
+    plt.ylabel("Калории", fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+user_name = "Григорий"
+user = next((u for u in load_users_data() if u['name'].lower() == user_name.lower()), None)
+
+get_stats(load_users_data(), load_workouts_data())
+analyze_user_activity(load_users_data(), load_workouts_data())
+analyze_workout_types(load_workouts_data())
+find_user_workouts(load_users_data(), load_workouts_data(), user_name)
+analyze_user(user, load_workouts_data())
+plot_workout_type_distribution(load_workouts_data())
+plot_user_activity_bar_chart(load_users_data(), load_workouts_data())
+plot_efficiency_by_type(load_workouts_data())
+plot_calories_by_user(load_users_data(), load_workouts_data())
+
